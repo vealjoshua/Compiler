@@ -6,7 +6,7 @@ enum token_enum
 	ID_UNDRSCR_ERR 	= -1,
 	ID_DGGT_ERR 	= -2,
 	BNG_ERR		= -3,
-	CMMT_ERR	= -4,
+	CMMNT_ERR	= -4,
 	UNKWN_ERR	= -1000,
 
 	EOFTOK		= 1000,
@@ -25,7 +25,7 @@ enum token_enum
 	PRDTOK		= 1013,
 	PRNTHSS_LFTTOK	= 1014,
 	PRNTHSS_RGHTTOK	= 1015,
-	CMMNTOK		= 1016,
+	CMMTOK		= 1016,
 	CRLYBRCKTLFTTOK		= 1017,
 	CRLYBRCKTRGHTTOK	= 1018,
 	SMCLNTOK	= 1019,
@@ -54,7 +54,6 @@ struct token_struct
 	enum token_enum tokenID;
 	char* tokenInstance;
 	int lineNum;
-};
-typedef struct token_struct tokenType;
+}typedef tokenType;
 
 #endif

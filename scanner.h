@@ -3,8 +3,10 @@
 
 #include "token.h"
 
-tokenType** scanner(char* str, int lineNumber, int* numOfTokens);
+
+tokenType* scanner();
 int testIfKeyword(char* id);
 int determineCharNum(char str);
+char* returnStateID(enum token_enum state);
 
 #endif

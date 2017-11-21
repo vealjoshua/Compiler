@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
-#include "testScanner.h"
+#include "extern.h"
+#include "parser.h"
+#include "testTree.h"
+#include "tree.h"
 
-// Scanner implementation
+extern FILE* fp;
 
 char *extractFileExtension(char *file);
 
 int main(int argc, char* argv[])
 {
-	FILE* fp;
-
 	if (argc == 1)
 	{
 		printf("Too few arguments.\n");
@@ -25,10 +27,9 @@ int main(int argc, char* argv[])
 		char str[SIZE];
 
 		printf("Please enter a string to return tokens.\n");
-		fgets(str, SIZE, fp);
+		fread(str, 1, sizeof(str), fp);
 		fclose(fp);
 
-		// Write to file, create one if it doesn't exist, close file, open file for reading because it wouldn't work if done all at once
 		if ((fp = fopen("temp.txt", "w+")) == NULL)
 		{
 		    perror("Opening file failed");
@@ -52,11 +53,13 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	testScanner(fp);
+	node* root = parser();
 	fclose(fp);
 	if (argc == 2)
 		remove("temp.txt");
-
+	testTree(root, 0);
+	deleteTree(root);
+	// free(root);
 	return 0;
 }
 
