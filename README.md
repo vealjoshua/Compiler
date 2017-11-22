@@ -1,5 +1,6 @@
 # Compiler
-Making a compiler for my class. Warning: C novices proceed with extreme caution.
+Making a compiler for my class.
+###### Warning: C novices proceed with extreme caution.
 
 ## Instructor Specifications
 Implement the parser in a separate file (parser.c and parser.h) including the initial auxilary parser() function and all nonterminal functions. Call the parser function from main.
