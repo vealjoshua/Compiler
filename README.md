@@ -66,13 +66,13 @@ Examples. Start with simplest programs and no variables and no comments.
 
 --------------------
     Begin
-      Check \[ 0 == 0 \] 
+      Check [ 0 == 0 ]
         Output 0 ; 
     End
 
 ---------------------
     Begin
-      Loop \[ 0 == 0 \] 
+      Loop [ 0 == 0 ]
         Output 0 ;
     End
 
@@ -106,9 +106,9 @@ Then use some statements as blocks, and try without variables in the block and t
         Var x1 , x2 .
         x : 2 + 3 % y ;
       End
-      Loop \[ x + 2 <= y + \[ 2 - 3\] + ( y )  \]
+      Loop [ x + 2 <= y + [ 2 - 3] + ( y )  ]
         Begin
-          Loop \[ x == ( \[ x \] ) \]
+          Loop [ x == ( [ x ] ) ]
             Begin
               Var x2 .
               Output 1 ;
