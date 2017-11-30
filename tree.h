@@ -3,14 +3,14 @@
 
 #include "token.h"
 
-struct bin_tree 
+typedef struct node
 {
 	char* func;
     tokenType* tok;
-    struct bin_tree* child1;
-    struct bin_tree* child2;
-    struct bin_tree* child3;
-    struct bin_tree* child4;
-}typedef node;
+    struct node* child1;
+    struct node* child2;
+    struct node* child3;
+    struct node* child4;
+} node;
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "token.h"
 #include "tree.h"
 
 node* parser();
@@ -22,6 +21,5 @@ node* if_stmt();
 node* loop();
 node* assign();
 node* RO();
-char* returnStateID(enum token_enum state);
 
 #endif

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "extern.h"
 #include "parser.h"
+#include "token.h"
 
 extern FILE* fp;
 
@@ -12,12 +13,9 @@ node* parser()
 	node* root = program();
 
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 	
-	if (returnStateID(token->tokenID) == "EOFTOK")
-	{
+	if (strcmp(returnStateID(token->tokenID), "EOFTOK") == 0)
 		free(token);
-	}
 	else
 	{
 		free(root);
@@ -27,14 +25,12 @@ node* parser()
 		exit(-1);
 	}
 
-	printf("Success.\n");
 	return root;
 }
 
 // <program> -> <vars> <block>
 node* program()
 {
-
 	node* p = malloc(sizeof(node));
 	p->func = "<program>";
 	p->child1 = vars();
@@ -47,9 +43,8 @@ node* block()
 {
 	node* p = malloc(sizeof(node));
 	tokenType* beginTok = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(beginTok->tokenID), beginTok->tokenInstance, beginTok->lineNum);
 	p->func = "<block>";
-	if (returnStateID(beginTok->tokenID) == "BGNTOK")
+	if (strcmp(returnStateID(beginTok->tokenID), "BGNTOK") == 0)
 	{
 		free(beginTok->tokenInstance);
 		free(beginTok);
@@ -57,9 +52,8 @@ node* block()
 		p->child2 = stats();
 
 		tokenType* endToken = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(endToken->tokenID), endToken->tokenInstance, endToken->lineNum);
 
-		if (returnStateID(endToken->tokenID) == "ENDTOK")
+		if (strcmp(returnStateID(endToken->tokenID), "ENDTOK") == 0)
 		{
 			free(endToken->tokenInstance);
 			free(endToken);
@@ -90,21 +84,17 @@ node* vars()
 {
 	node* p = malloc(sizeof(node));
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 	p->func = "<vars>";
-	if (returnStateID(token->tokenID) == "VRTOK")
+	if (strcmp(returnStateID(token->tokenID), "VRTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
 
 		tokenType* idTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(idTok->tokenID), idTok->tokenInstance, idTok->lineNum);
 
-		if (returnStateID(idTok->tokenID) == "IDTOK")
+		if (strcmp(returnStateID(idTok->tokenID), "IDTOK") == 0)
 		{
 			p->tok = idTok;
-			// free(idTok->tokenInstance);
-			// free(idTok);
 			p->child1 = mvars();
 		}
 		else
@@ -133,27 +123,23 @@ node* mvars()
 {
 	node* p = malloc(sizeof(node));
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 	p->func = "<mvars>";
 
-	if (returnStateID(token->tokenID) == "PRDTOK")
+	if (strcmp(returnStateID(token->tokenID), "PRDTOK") == 0)
 	{
 		free(p);
 		free(token->tokenInstance);
 		free(token);
 	}
-	else if (returnStateID(token->tokenID) == "CMMTOK")
+	else if (strcmp(returnStateID(token->tokenID), "CMMTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
 		tokenType* idTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(idTok->tokenID), idTok->tokenInstance, idTok->lineNum);
 
-		if (returnStateID(idTok->tokenID) == "IDTOK")
+		if (strcmp(returnStateID(idTok->tokenID), "IDTOK") == 0)
 		{
 			p->tok = idTok;
-			// free(idTok->tokenInstance);
-			// free(idTok);
 			p->child1 = mvars();
 		}
 		else
@@ -183,21 +169,15 @@ node* expr()
 	node* p = malloc(sizeof(node));
 	p->func = "<expr>";
 	p->child1 = M();
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "PLSTOK")
+	if (strcmp(returnStateID(token->tokenID), "PLSTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child2 = expr();
 	}
-	else if (returnStateID(token->tokenID) == "MNSTOK")
+	else if (strcmp(returnStateID(token->tokenID), "MNSTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child2 = expr();
 	}
@@ -217,21 +197,15 @@ node* M()
 	node* p = malloc(sizeof(node));
 	p->func = "<M>";
 	p->child1 = F();
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "PRCNTTOK")
+	if (strcmp(returnStateID(token->tokenID), "PRCNTTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child2 = M();
 	}
-	else if (returnStateID(token->tokenID) == "STRTOK")
+	else if (strcmp(returnStateID(token->tokenID), "STRTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child2 = M();
 	}
@@ -250,20 +224,14 @@ node* F()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<F>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "PRNTHSS_LFTTOK")
+	if (strcmp(returnStateID(token->tokenID), "PRNTHSS_LFTTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->child1 = F();
-
 		tokenType* rightTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(rightTok->tokenID), rightTok->tokenInstance, rightTok->lineNum);
 
-		if (returnStateID(rightTok->tokenID) == "PRNTHSS_RGHTTOK")
+		if (strcmp(returnStateID(rightTok->tokenID), "PRNTHSS_RGHTTOK") == 0)
 		{
 			free(rightTok->tokenInstance);
 			free(rightTok);
@@ -293,21 +261,18 @@ node* R()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<R>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
+	char* stateID = returnStateID(token->tokenID);
 
-	if (returnStateID(token->tokenID) == "BRCKT_LFTTOK")
+	if (strcmp(stateID, "BRCKT_LFTTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
 
 		p->child1 = expr();
-
 		tokenType* rightTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(rightTok->tokenID), rightTok->tokenInstance, rightTok->lineNum);
 
-		if (returnStateID(rightTok->tokenID) == "BRCKT_RGHTTOK")
+		if (strcmp(returnStateID(rightTok->tokenID), "BRCKT_RGHTTOK") == 0)
 		{
 			free(rightTok->tokenInstance);
 			free(rightTok);
@@ -320,18 +285,8 @@ node* R()
 			exit(-1);
 		}
 	}
-	else if (returnStateID(token->tokenID) == "IDTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
+	else if (strcmp(stateID, "IDTOK") == 0 || strcmp(stateID, "DGGTTOK") == 0)
 		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "DGGTTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
 	else
 	{
 		fprintf(stderr, "Error: Missing '[' on line %d.\n", token->lineNum);
@@ -357,16 +312,15 @@ node* mStat()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<mStat>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
+	char* stateID = returnStateID(token->tokenID);
 
-	if (returnStateID(token->tokenID) == "INPTTOK" || 
-		returnStateID(token->tokenID) == "OTPTTOK" || 
-		returnStateID(token->tokenID) == "BGNTOK" || 
-		returnStateID(token->tokenID) == "CHCKTOK" || 
-		returnStateID(token->tokenID) == "LPTOK" || 
-		returnStateID(token->tokenID) == "IDTOK")
+	if (strcmp(stateID, "INPTTOK") == 0 || 
+		strcmp(stateID, "OTPTTOK") == 0 || 
+		strcmp(stateID, "BGNTOK") == 0 || 
+		strcmp(stateID, "CHCKTOK") == 0 || 
+		strcmp(stateID, "LPTOK") == 0 || 
+		strcmp(stateID, "IDTOK") == 0)
 	{
 		long int SIZE = strlen(token->tokenInstance);
 		fseek(fp, -SIZE, SEEK_CUR);
@@ -391,28 +345,21 @@ node* stat()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<stat>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
+	char* stateID = returnStateID(token->tokenID);
 
-	if (returnStateID(token->tokenID) == "INPTTOK")
+	if (strcmp(stateID, "INPTTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child1 = in();
 	}
-	else if (returnStateID(token->tokenID) == "OTPTTOK")
+	else if (strcmp(stateID, "OTPTTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child1 = out();
 	}
-	else if (returnStateID(token->tokenID) == "BGNTOK")
+	else if (strcmp(stateID, "BGNTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		long int SIZE = strlen(token->tokenInstance);
 		fseek(fp, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
@@ -420,24 +367,18 @@ node* stat()
 
 		p->child1 = block();
 	}
-	else if (returnStateID(token->tokenID) == "CHCKTOK")
+	else if (strcmp(stateID, "CHCKTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child1 = if_stmt();
 	}
-	else if (returnStateID(token->tokenID) == "LPTOK")
+	else if (strcmp(stateID, "LPTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child1 = loop();
 	}
-	else if (returnStateID(token->tokenID) == "IDTOK")
+	else if (strcmp(stateID, "IDTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
 		p->child1 = assign();
 	}
@@ -456,20 +397,14 @@ node* in()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<in>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "IDTOK")
+	if (strcmp(returnStateID(token->tokenID), "IDTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
 		p->tok = token;
-
 		tokenType* semiTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(semiTok->tokenID), semiTok->tokenInstance, semiTok->lineNum);
 
-		if (returnStateID(semiTok->tokenID) == "SMCLNTOK")
+		if (strcmp(returnStateID(semiTok->tokenID), "SMCLNTOK") == 0)
 		{
 			free(semiTok->tokenInstance);
 			free(semiTok);
@@ -502,11 +437,9 @@ node* out()
 	node* p = malloc(sizeof(node));
 	p->func = "<out>";
 	p->child1 = expr();
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "SMCLNTOK")
+	if (strcmp(returnStateID(token->tokenID), "SMCLNTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
@@ -527,11 +460,9 @@ node* if_stmt()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<if_stmt>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "BRCKT_LFTTOK")
+	if (strcmp(returnStateID(token->tokenID), "BRCKT_LFTTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
@@ -541,9 +472,7 @@ node* if_stmt()
 		p->child3 = expr();
 
 		tokenType* rightTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(rightTok->tokenID), rightTok->tokenInstance, rightTok->lineNum);
-
-		if (returnStateID(rightTok->tokenID) == "BRCKT_RGHTTOK")
+		if (strcmp(returnStateID(rightTok->tokenID), "BRCKT_RGHTTOK") == 0)
 		{
 			free(rightTok->tokenInstance);
 			free(rightTok);
@@ -574,11 +503,9 @@ node* loop()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<loop>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "BRCKT_LFTTOK")
+	if (strcmp(returnStateID(token->tokenID), "BRCKT_LFTTOK") == 0)
 	{
 		free(token->tokenInstance);
 		free(token);
@@ -586,11 +513,9 @@ node* loop()
 		p->child1 = expr();
 		p->child2 = RO();
 		p->child3 = expr();
-
 		tokenType* rightTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(rightTok->tokenID), rightTok->tokenInstance, rightTok->lineNum);
 
-		if (returnStateID(rightTok->tokenID) == "BRCKT_RGHTTOK")
+		if (strcmp(returnStateID(rightTok->tokenID), "BRCKT_RGHTTOK") == 0)
 		{
 			free(rightTok->tokenInstance);
 			free(rightTok);
@@ -621,21 +546,16 @@ node* assign()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<assign>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
 
-	if (returnStateID(token->tokenID) == "CLNTOK")
+	if (strcmp(returnStateID(token->tokenID), "CLNTOK") == 0)
 	{
-		// free(token->tokenInstance);
-		// free(token);
+
 		p->tok = token;
 		p->child1 = expr();
-
 		tokenType* semiTok = (tokenType*) (intptr_t) scanner();
-		printf("%s %s %d\n", returnStateID(semiTok->tokenID), semiTok->tokenInstance, semiTok->lineNum);
 
-		if (returnStateID(semiTok->tokenID) == "SMCLNTOK")
+		if (strcmp(returnStateID(semiTok->tokenID), "SMCLNTOK") == 0)
 		{
 			free(semiTok->tokenInstance);
 			free(semiTok);
@@ -665,46 +585,15 @@ node* RO()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<RO>";
-
 	tokenType* token = (tokenType*) (intptr_t) scanner();
-	printf("%s %s %d\n", returnStateID(token->tokenID), token->tokenInstance, token->lineNum);
-
-	if (returnStateID(token->tokenID) == "LSSRTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "LSSR_EQTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "GRTRTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "GRTR_EQTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "CMPRTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
-	else if (returnStateID(token->tokenID) == "NTEQTOK")
-	{
-		// free(token->tokenInstance);
-		// free(token);
-		p->tok = token;
-	}
+	char* stateID = returnStateID(token->tokenID);
+	if (strcmp(stateID, "LSSRTOK") == 0 ||
+		strcmp(stateID, "LSSR_EQTOK") == 0 ||
+		strcmp(stateID, "GRTRTOK") == 0 ||
+		strcmp(stateID, "GRTR_EQTOK") == 0 ||
+		strcmp(stateID, "CMPRTOK") == 0 ||
+		strcmp(stateID, "NTEQTOK") == 0)
+			p->tok = token;
 	else
 	{
 		fprintf(stderr, "Error: No operator on line %d.\n", token->lineNum);
@@ -715,95 +604,4 @@ node* RO()
 	}
 
 	return p;
-}
-
-char* returnStateID(enum token_enum state)
-{
-	switch(state)
-	{
-		case EOFTOK:
-			return "EOFTOK";
-		case IDTOK:
-			return "IDTOK";
-		case DGGTTOK:
-			return "DGGTTOK";
-		case EQLTOK:
-			return "EQLTOK";
-		case LSSRTOK:
-			return "LSSRTOK";
-		case GRTRTOK:
-			return "GRTRTOK";
-		case CLNTOK:
-			return "CLNTOK";
-		case PLSTOK:
-			return "PLSTOK";
-		case MNSTOK:
-			return "MNSTOK";
-		case STRTOK:
-			return "STRTOK";
-		case DVDTOK:
-			return "DVDTOK";
-		case ANDTOK:
-			return "ANDTOK";
-		case PRCNTTOK:
-			return "PRCNTTOK";
-		case PRDTOK:
-			return "PRDTOK";
-		case PRNTHSS_LFTTOK:
-			return "PRNTHSS_LFTTOK";
-		case PRNTHSS_RGHTTOK:
-			return "PRNTHSS_RGHTTOK";
-		case CMMTOK:
-			return "CMMTOK";
-		case CRLYBRCKTLFTTOK:
-			return "CRLYBRCKTLFTTOK";
-		case CRLYBRCKTRGHTTOK:
-			return "CRLYBRCKTRGHTTOK";
-		case SMCLNTOK:
-			return "SMCLNTOK";
-		case BRCKT_LFTTOK:
-			return "BRCKT_LFTTOK";
-		case BRCKT_RGHTTOK:
-			return "BRCKT_RGHTTOK";
-		case CMMNTTOK:
-			return "CMMNTTOK";
-		case CMPRTOK:
-			return "CMPRTOK";
-		case LSSR_EQTOK:
-			return "LSSR_EQTOK";
-		case GRTR_EQTOK:
-			return "GRTR_EQTOK";
-		case NTEQTOK:
-			return "NTEQTOK";
-		case ID_UNDRSCR_ERR:
-			return "ID_UNDRSCR_ERR: No token starts with '_'.";
-		case ID_DGGT_ERR:
-			return "ID_DGGT_ERR: ID token cannot start with digit.";
-		case BNG_ERR:
-			return "BNG_ERR: '!' Can not be without '='.";
-		case CMMNT_ERR:
-			return "CMMNT_ERR: No closing comment found.";
-		case UNKWN_ERR:
-			return "UNKWN_ERR: Uknown character.";
-		case BGNTOK:
-			return "BGNTOK";
-		case ENDTOK:
-			return "ENDTOK";
-		case CHCKTOK:
-			return "CHCKTOK";
-		case LPTOK:
-			return "LPTOK";
-		case VDTOK:
-			return "VDTOK";
-		case VRTOK:
-			return "VRTOK";
-		case RTRNTOK:
-			return "RTRNTOK";
-		case INPTTOK:
-			return "INPTTOK";
-		case OTPTTOK:
-			return "OTPTTOK";
-		case PRGRMTOK:
-			return "PRGRMTOK";
-	}
 }

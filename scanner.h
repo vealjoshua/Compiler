@@ -3,7 +3,6 @@
 
 #include "token.h"
 
-
 tokenType* scanner();
 int testIfKeyword(char* id);
 int determineCharNum(char str);

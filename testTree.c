@@ -3,12 +3,24 @@
 #include "testTree.h"
 #include "token.h"
 
+void globalVars(node* p)
+{
+	if (strcmp(p->func, "Vars") == 0)
+	{
+		
+	}
+}
+
 void testTree(node* p, int level)
 {
 	if (p->tok)
+	{
 		printf("%*c%s %s\n", level, ' ', p->func, p->tok->tokenInstance);
+	}
 	else
+	{
 		printf("%*c%s\n", level, ' ', p->func);
+	}
 	if (p->child1)
 		testTree(p->child1, ++level);
 	if (p->child2)

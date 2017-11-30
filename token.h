@@ -49,11 +49,13 @@ enum token_enum
 	PRGRMTOK	= 2009
 };
 
-struct token_struct
+typedef struct tokenType
 {
 	enum token_enum tokenID;
 	char* tokenInstance;
 	int lineNum;
-}typedef tokenType;
+} tokenType;
+
+char* returnStateID(enum token_enum state);
 
 #endif
