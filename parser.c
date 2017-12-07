@@ -6,7 +6,7 @@
 #include "parser.h"
 #include "token.h"
 
-extern FILE* fp;
+extern FILE* inputFile;
 
 node* parser()
 {
@@ -120,7 +120,7 @@ node* vars()
 	{
 		free(p);
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 	}
@@ -197,7 +197,7 @@ node* expr()
 	else
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 	}
@@ -225,7 +225,7 @@ node* M()
 	else
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 	}
@@ -260,7 +260,7 @@ node* F()
 	else
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 
@@ -336,7 +336,7 @@ node* mStat()
 		strcmp(stateID, "IDTOK") == 0)
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 
@@ -346,7 +346,7 @@ node* mStat()
 	else
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 	}
@@ -374,7 +374,7 @@ node* stat()
 	else if (strcmp(stateID, "BGNTOK") == 0)
 	{
 		long int SIZE = strlen(token->tokenInstance);
-		fseek(fp, -SIZE, SEEK_CUR);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
 

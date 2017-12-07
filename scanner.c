@@ -4,7 +4,7 @@
 #include "scanner.h"
 #include "token.h"
 
-extern FILE* fp;
+extern FILE* inputFile;
 
 tokenType* scanner()
 {
@@ -49,12 +49,12 @@ tokenType* scanner()
 	char* str = strHEAD;
 
 	int c = 0, nextC = 0;
-	while((c = fgetc(fp)) != EOF) {
-		nextC = fgetc(fp);
+	while((c = fgetc(inputFile)) != EOF) {
+		nextC = fgetc(inputFile);
 		if (nextC == EOF)
-			fseek(fp, 0, SEEK_END);
+			fseek(inputFile, 0, SEEK_END);
 		else
-			fseek(fp, -1L, SEEK_CUR);
+			fseek(inputFile, -1L, SEEK_CUR);
 
 		int charNum = determineCharNum(c);
 		int nextCharNum = determineCharNum(nextC);
