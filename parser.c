@@ -22,7 +22,7 @@ node* parser()
 		free(token->tokenInstance);
 		free(token);
 		fprintf(stderr, "No EOFTOK\n");
-		exit(-1);
+		exit(1);
 	}
 
 	return root;
@@ -35,6 +35,8 @@ node* program()
 	p->func = "<program>";
 	p->child1 = vars();
 	p->child2 = block();
+	p->child3 = NULL;
+	p->child4 = NULL;
 	return p;
 }
 
@@ -42,14 +44,17 @@ node* program()
 node* block()
 {
 	node* p = malloc(sizeof(node));
-	tokenType* beginTok = (tokenType*) (intptr_t) scanner();
 	p->func = "<block>";
+
+	tokenType* beginTok = (tokenType*) (intptr_t) scanner();
 	if (strcmp(returnStateID(beginTok->tokenID), "BGNTOK") == 0)
 	{
 		free(beginTok->tokenInstance);
 		free(beginTok);
 		p->child1 = vars();
 		p->child2 = stats();
+		p->child3 = NULL;
+		p->child4 = NULL;
 
 		tokenType* endToken = (tokenType*) (intptr_t) scanner();
 
@@ -64,7 +69,7 @@ node* block()
 			free(p);
 			free(endToken->tokenInstance);
 			free(endToken);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -73,7 +78,7 @@ node* block()
 		free(p);
 		free(beginTok->tokenInstance);
 		free(beginTok);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -83,8 +88,13 @@ node* block()
 node* vars()
 {
 	node* p = malloc(sizeof(node));
-	tokenType* token = (tokenType*) (intptr_t) scanner();
 	p->func = "<vars>";
+	p->child1 = NULL;
+	p->child2 = NULL;
+	p->child3 = NULL;
+	p->child4 = NULL;
+
+	tokenType* token = (tokenType*) (intptr_t) scanner();
 	if (strcmp(returnStateID(token->tokenID), "VRTOK") == 0)
 	{
 		free(token->tokenInstance);
@@ -103,7 +113,7 @@ node* vars()
 			free(p);
 			free(idTok->tokenInstance);
 			free(idTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -124,10 +134,13 @@ node* mvars()
 	node* p = malloc(sizeof(node));
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 	p->func = "<mvars>";
+	p->child1 = NULL;
+	p->child2 = NULL;
+	p->child3 = NULL;
+	p->child4 = NULL;
 
 	if (strcmp(returnStateID(token->tokenID), "PRDTOK") == 0)
 	{
-		free(p);
 		free(token->tokenInstance);
 		free(token);
 	}
@@ -148,7 +161,7 @@ node* mvars()
 			free(p);
 			free(idTok->tokenInstance);
 			free(idTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -157,7 +170,7 @@ node* mvars()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -241,7 +254,7 @@ node* F()
 			fprintf(stderr, "Error: Missing ')' on line %d.\n", rightTok->lineNum);
 			free(rightTok->tokenInstance);
 			free(rightTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -282,7 +295,7 @@ node* R()
 			fprintf(stderr, "Error: Missing ']' on line %d.\n", rightTok->lineNum);
 			free(rightTok->tokenInstance);
 			free(rightTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else if (strcmp(stateID, "IDTOK") == 0 || strcmp(stateID, "DGGTTOK") == 0)
@@ -292,7 +305,7 @@ node* R()
 		fprintf(stderr, "Error: Missing '[' on line %d.\n", token->lineNum);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -387,7 +400,7 @@ node* stat()
 		fprintf(stderr, "Error: Invalid statement on line %d.\n", token->lineNum);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -417,7 +430,7 @@ node* in()
 			free(p);
 			free(semiTok->tokenInstance);
 			free(semiTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -426,7 +439,7 @@ node* in()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -450,7 +463,7 @@ node* out()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -484,7 +497,7 @@ node* if_stmt()
 			free(p);
 			free(rightTok->tokenInstance);
 			free(rightTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -493,7 +506,7 @@ node* if_stmt()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -527,7 +540,7 @@ node* loop()
 			free(p);
 			free(rightTok->tokenInstance);
 			free(rightTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -536,7 +549,7 @@ node* loop()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -566,7 +579,7 @@ node* assign()
 			free(p);
 			free(semiTok->tokenInstance);
 			free(semiTok);
-			exit(-1);
+			exit(1);
 		}
 	}
 	else
@@ -575,7 +588,7 @@ node* assign()
 		free(p);
 		free(token->tokenInstance);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;
@@ -600,7 +613,7 @@ node* RO()
 		free(token->tokenInstance);
 		free(p);
 		free(token);
-		exit(-1);
+		exit(1);
 	}
 
 	return p;

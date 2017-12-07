@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g -I.
-DEPS = extern.h parser.h scanner.h stack.h testTree.h token.h tree.h
-OBJ = main.o parser.o scanner.o stack.o testTree.o token.o
+DEPS = codeGenerator.h extern.h parser.h scanner.h stack.h staticSemantics.h token.h tree.h
+OBJ = codeGenerator.o main.o parser.o scanner.o stack.o staticSemantics.o token.o
 
 %.o: %.c $(DEPS)
 		$(CC) -c -o $@ $< $(CFLAGS)

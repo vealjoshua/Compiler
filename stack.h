@@ -12,8 +12,9 @@ struct StackNode
 
 StackNode* newNode(tokenType* token);
 int isEmpty(StackNode* root);
-void push(StackNode* root, tokenType* token);
-char* pop(StackNode* root);
+void push(StackNode** root, tokenType* token);
+char* pop(StackNode** root);
+void popStack(StackNode** root);
 int find(StackNode* root, char* idTok, int distance);
 char* peek(StackNode* root);
 

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
-FILE* fp;
+FILE* inputFile;
+FILE* outputFile;
 
 #endif

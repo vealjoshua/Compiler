@@ -7,27 +7,30 @@
 #include "testTree.h"
 #include "tree.h"
 
-extern FILE* fp;
+extern FILE* inputFile;
+extern FILE* outputFile;
 
-FILE* processArgs(int argc, char* argv[], char** fn);
+void processArgs(int argc, char* argv[]);
 char *extractFileExtension(char *file);
 
 int main(int argc, char* argv[])
 {
-	char* fileName = NULL;
-	fp = processArgs(argc, argv, &fileName);
+	// Handle command line arguments
+	processArgs(argc, argv);
+
+	// Get root node from parse tree
 	node* root = parser();
-	fclose(fp);
+	fclose(inputFile);
 	if (argc == 2)
 		remove("temp.txt");
-	testTree(root, 0);
+
+	startStaticSemantics(root, outputFile);
 	deleteTree(root);
 	return 0;
 }
 
-FILE* processArgs(int argc, char* argv[], char** fn)
+void processArgs(int argc, char* argv[])
 {
-	FILE* fp;
 	if (argc < 2)
 	{
 		fprintf(stderr, "%s\n", "Too few arguments.");
@@ -35,38 +38,42 @@ FILE* processArgs(int argc, char* argv[], char** fn)
 	}
 	else if (argc == 2) // File redirection
 	{
-		fp = fopen("temp.txt", "w+");
-		if (fp == NULL)
+		if ((inputFile = fopen("temp.txt", "w+")) == NULL)
 		{
 			perror("Opening file 'temp.txt' failed");
 		    exit(1);
 		}
-		FILE* fp2 = stdin;
+		if ((outputFile = fopen("out.asm", "w+")) == NULL)
+		{
+			perror("Opening file 'out.asm' failed");
+		    exit(1);
+		}
 
+		FILE* readFromOut = stdin;
 		int c;
-		while((c = fgetc(fp2)) != EOF && !feof(fp))
-			fputc(c, fp);
-		fseek(fp, 0, SEEK_SET);
-
-		close(fp2);
-		*fn = "out.asm";
+		while((c = fgetc(readFromOut)) != EOF && !feof(readFromOut))
+			fputc(c, inputFile);
+		close(readFromOut);
+		fseek(inputFile, 0, SEEK_SET);
 	}
 	else if (argc == 3) // Input file
 	{
-		if ((fp = fopen(argv[2], "r")) == NULL)
+		if ((inputFile = fopen(argv[2], "r")) == NULL)
 		{
 			perror("Opening file failed");
 		    exit(1);
 		}
-		*fn = argv[2];
+		if ((outputFile = fopen("file.asm", "w+")) == NULL)
+		{
+			perror("Opening file 'file.asm' failed");
+		    exit(1);
+		}
 	}
 	else
 	{
 		fprintf(stderr, "%s\n", "Too many arguments.");
 		exit(1);
 	}
-
-	return fp;
 }
 
 char *extractFileExtension(char *file)
