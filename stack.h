@@ -16,6 +16,7 @@ void push(StackNode** root, tokenType* token);
 char* pop(StackNode** root);
 void popStack(StackNode** root);
 int find(StackNode* root, char* idTok, int distance);
+int verify(StackNode* root, char* idTok);
 char* peek(StackNode* root);
 
 #endif

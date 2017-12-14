@@ -272,7 +272,7 @@ int determineCharNum(char str)
 	CMMNTTOK	= 1022,
 	CMPRTOK		= 1023,
 	LSSR_EQTOK	= 1024,
-	GRTR_EQTOK	= 1025,
+	GRTREQTOK	= 1025,
 	NTEQTOK		= 1026,
 
 	BGNTOK		= 2000,

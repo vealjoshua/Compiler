@@ -52,10 +52,10 @@ char* returnStateID(enum token_enum state)
 			return "CMMNTTOK";
 		case CMPRTOK:
 			return "CMPRTOK";
-		case LSSR_EQTOK:
-			return "LSSR_EQTOK";
-		case GRTR_EQTOK:
-			return "GRTR_EQTOK";
+		case LSSREQTOK:
+			return "LSSREQTOK";
+		case GRTREQTOK:
+			return "GRTREQTOK";
 		case NTEQTOK:
 			return "NTEQTOK";
 		case ID_UNDRSCR_ERR:

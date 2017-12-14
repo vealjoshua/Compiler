@@ -40,7 +40,7 @@ char* pop(StackNode** root)
     return popped;
 }
 
-void popStack(StackNode** root) // Does not work
+void popStack(StackNode** root) // Does not work?
 {
     if (pop(root))
         popStack(root);
@@ -48,16 +48,28 @@ void popStack(StackNode** root) // Does not work
 
 int find(StackNode* root, char* idTok, int distance)
 {
-    if (root)
+    if (root && distance > 0)
     {
         if (strcmp(root->token->tokenInstance, idTok) == 0)
-        {
             return distance;
-        }
         else
             find(root->next, idTok, --distance);
     }
-    return -1;
+    else
+        return -1;
+}
+
+int verify(StackNode* root, char* idTok)
+{
+    if (root)
+    {
+        if (strcmp(root->token->tokenInstance, idTok) == 0)
+            return 1;
+        else
+            verify(root->next, idTok);
+    }
+    else
+        return 0;
 }
  
 char* peek(StackNode* root)

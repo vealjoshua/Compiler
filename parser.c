@@ -35,8 +35,6 @@ node* program()
 	p->func = "<program>";
 	p->child1 = vars();
 	p->child2 = block();
-	p->child3 = NULL;
-	p->child4 = NULL;
 	return p;
 }
 
@@ -53,8 +51,6 @@ node* block()
 		free(beginTok);
 		p->child1 = vars();
 		p->child2 = stats();
-		p->child3 = NULL;
-		p->child4 = NULL;
 
 		tokenType* endToken = (tokenType*) (intptr_t) scanner();
 
@@ -89,10 +85,6 @@ node* vars()
 {
 	node* p = malloc(sizeof(node));
 	p->func = "<vars>";
-	p->child1 = NULL;
-	p->child2 = NULL;
-	p->child3 = NULL;
-	p->child4 = NULL;
 
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 	if (strcmp(returnStateID(token->tokenID), "VRTOK") == 0)
@@ -119,6 +111,7 @@ node* vars()
 	else
 	{
 		free(p);
+		p = NULL;
 		long int SIZE = strlen(token->tokenInstance);
 		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
@@ -134,10 +127,6 @@ node* mvars()
 	node* p = malloc(sizeof(node));
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 	p->func = "<mvars>";
-	p->child1 = NULL;
-	p->child2 = NULL;
-	p->child3 = NULL;
-	p->child4 = NULL;
 
 	if (strcmp(returnStateID(token->tokenID), "PRDTOK") == 0)
 	{
@@ -184,12 +173,7 @@ node* expr()
 	p->child1 = M();
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 
-	if (strcmp(returnStateID(token->tokenID), "PLSTOK") == 0)
-	{
-		p->tok = token;
-		p->child2 = expr();
-	}
-	else if (strcmp(returnStateID(token->tokenID), "MNSTOK") == 0)
+	if (strcmp(returnStateID(token->tokenID), "PLSTOK") == 0 || strcmp(returnStateID(token->tokenID), "MNSTOK") == 0)
 	{
 		p->tok = token;
 		p->child2 = expr();
@@ -212,12 +196,7 @@ node* M()
 	p->child1 = F();
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 
-	if (strcmp(returnStateID(token->tokenID), "PRCNTTOK") == 0)
-	{
-		p->tok = token;
-		p->child2 = M();
-	}
-	else if (strcmp(returnStateID(token->tokenID), "STRTOK") == 0)
+	if (strcmp(returnStateID(token->tokenID), "PRCNTTOK") == 0 || strcmp(returnStateID(token->tokenID), "STRTOK") == 0)
 	{
 		p->tok = token;
 		p->child2 = M();
@@ -302,7 +281,7 @@ node* R()
 		p->tok = token;
 	else
 	{
-		fprintf(stderr, "Error: Missing '[' on line %d.\n", token->lineNum);
+		fprintf(stderr, "Error: Missing '[' or expr on line %d.\n", token->lineNum);
 		free(token->tokenInstance);
 		free(token);
 		exit(1);
@@ -328,12 +307,7 @@ node* mStat()
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 	char* stateID = returnStateID(token->tokenID);
 
-	if (strcmp(stateID, "INPTTOK") == 0 || 
-		strcmp(stateID, "OTPTTOK") == 0 || 
-		strcmp(stateID, "BGNTOK") == 0 || 
-		strcmp(stateID, "CHCKTOK") == 0 || 
-		strcmp(stateID, "LPTOK") == 0 || 
-		strcmp(stateID, "IDTOK") == 0)
+	if (strcmp(stateID, "INPTTOK") == 0 || strcmp(stateID, "OTPTTOK") == 0 || strcmp(stateID, "BGNTOK") == 0 || strcmp(stateID, "CHCKTOK") == 0 || strcmp(stateID, "LPTOK") == 0 || strcmp(stateID, "IDTOK") == 0)
 	{
 		long int SIZE = strlen(token->tokenInstance);
 		fseek(inputFile, -SIZE, SEEK_CUR);
@@ -363,12 +337,10 @@ node* stat()
 
 	if (strcmp(stateID, "INPTTOK") == 0)
 	{
-		p->tok = token;
 		p->child1 = in();
 	}
 	else if (strcmp(stateID, "OTPTTOK") == 0)
 	{
-		p->tok = token;
 		p->child1 = out();
 	}
 	else if (strcmp(stateID, "BGNTOK") == 0)
@@ -382,25 +354,24 @@ node* stat()
 	}
 	else if (strcmp(stateID, "CHCKTOK") == 0)
 	{
-		p->tok = token;
 		p->child1 = if_stmt();
 	}
 	else if (strcmp(stateID, "LPTOK") == 0)
 	{
-		p->tok = token;
 		p->child1 = loop();
 	}
 	else if (strcmp(stateID, "IDTOK") == 0)
 	{
-		p->tok = token;
+		long int SIZE = strlen(token->tokenInstance);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		p->child1 = assign();
 	}
-	else
+	else // Allow for empty
 	{
-		fprintf(stderr, "Error: Invalid statement on line %d.\n", token->lineNum);
+		long int SIZE = strlen(token->tokenInstance);
+		fseek(inputFile, -SIZE, SEEK_CUR);
 		free(token->tokenInstance);
 		free(token);
-		exit(1);
 	}
 
 	return p;
@@ -560,11 +531,13 @@ node* assign()
 	node* p = malloc(sizeof(node));
 	p->func = "<assign>";
 	tokenType* token = (tokenType*) (intptr_t) scanner();
+	p->tok = token;
 
-	if (strcmp(returnStateID(token->tokenID), "CLNTOK") == 0)
+	tokenType* clnTok = (tokenType*) (intptr_t) scanner();
+
+	if (strcmp(returnStateID(clnTok->tokenID), "CLNTOK") == 0)
 	{
 
-		p->tok = token;
 		p->child1 = expr();
 		tokenType* semiTok = (tokenType*) (intptr_t) scanner();
 
@@ -601,9 +574,9 @@ node* RO()
 	tokenType* token = (tokenType*) (intptr_t) scanner();
 	char* stateID = returnStateID(token->tokenID);
 	if (strcmp(stateID, "LSSRTOK") == 0 ||
-		strcmp(stateID, "LSSR_EQTOK") == 0 ||
+		strcmp(stateID, "LSSREQTOK") == 0 ||
 		strcmp(stateID, "GRTRTOK") == 0 ||
-		strcmp(stateID, "GRTR_EQTOK") == 0 ||
+		strcmp(stateID, "GRTREQTOK") == 0 ||
 		strcmp(stateID, "CMPRTOK") == 0 ||
 		strcmp(stateID, "NTEQTOK") == 0)
 			p->tok = token;

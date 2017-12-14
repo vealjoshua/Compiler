@@ -1,5 +1,15 @@
-Var x.
+Var x .
 Begin
-	Var y, z.
-	Output 1;
+  Input x ;
+  Begin 
+     Var x .
+     Input x ;
+     Begin
+        Var x .
+        Input x ;
+        Output x ;
+     End
+     Output x ;
+  End
+  Output x ;
 End

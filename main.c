@@ -24,7 +24,8 @@ int main(int argc, char* argv[])
 	if (argc == 2)
 		remove("temp.txt");
 
-	startStaticSemantics(root, outputFile);
+	startStaticSemantics(root);
+	fclose(outputFile);
 	deleteTree(root);
 	return 0;
 }
