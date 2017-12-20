@@ -5,6 +5,6 @@
 
 void pushToStack(node* p);
 void startStaticSemantics(node* p);
-void traverseTree(node* p, int level);
+void traverseTree(node* p, int level, int* vc);
 
 #endif

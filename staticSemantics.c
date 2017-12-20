@@ -8,22 +8,24 @@
 #include "token.h"
 
 extern FILE* outputFile;
-static StackNode* stack_node = NULL;
+static StackNode* gv_stack = NULL; 
+static StackNode* lv_stack = NULL;
 static int localVarCount = 0, globalVarCount = 0;
 static int gvFlag = 1;
 static int funcs = 0;
 
 void startStaticSemantics(node* p)
 {
-	traverseTree(p, 0);
+	int vc = 0;
+	traverseTree(p, 0, &vc);
 
 	// Pop the last local vars from stack
 	int i;
-	for (i = 0; i < localVarCount; i++)
-	{
-		free(pop(&stack_node));
-		POP();
-	}
+	// for (i = 0; i < localVarCount; i++)
+	// {
+	// 	free(pop(&stack_node));
+	// 	POP();
+	// }
 
 	// Stop asm program
 	STOP();
@@ -31,7 +33,7 @@ void startStaticSemantics(node* p)
 	// Pop global vars, write them to asm file
 	for (i = 0; i < globalVarCount; i++)
 	{
-		char* gv = pop(&stack_node);
+		char* gv = pop(&gv_stack);
 		GLOBVARS(gv);
 		free(gv);
 	}
@@ -41,7 +43,7 @@ void startStaticSemantics(node* p)
 	GLOBVARS("V#");
 }
 
-void traverseTree(node* p, int level)
+void traverseTree(node* p, int level, int* vc)
 {
 	if (p->func && p->tok)
 		printf("%*c%s %s\n", level, ' ', p->func, p->tok->tokenInstance);
@@ -52,29 +54,21 @@ void traverseTree(node* p, int level)
 		fprintf(stderr, "Error. Node has no function or token\n");
 		exit(1);
 	}
-
 	if (strcmp(p->func, "<block>") == 0)
 	{
 		gvFlag = 0;
-
+		int vc = 0;
 		if (p->child1)
-			traverseTree(p->child1, ++level);
-		globalVarCount += localVarCount;
+			traverseTree(p->child1, ++level, &vc);
+		localVarCount += vc;
 		if (p->child2)
-			traverseTree(p->child2, ++level);
-		if (p->child3)
-			traverseTree(p->child3, ++level);
-		if (p->child4)
-			traverseTree(p->child4, ++level);
-
+			traverseTree(p->child2, ++level, &vc);
 		int i;
-		for(i = 0; i < localVarCount; i++)
+		for (i = 0; i < vc; i++)
 		{
-			free(pop(&stack_node));
+			pop(&lv_stack);
 			POP();
 		}
-		globalVarCount -= localVarCount;
-		localVarCount = 0;
 	}
 	else if (strcmp(p->func, "<vars>") == 0 || strcmp(p->func, "<mvars>") == 0)
 	{
@@ -82,39 +76,41 @@ void traverseTree(node* p, int level)
 		{
 			if (gvFlag)
 			{
-				if (find(stack_node, p->tok->tokenInstance, globalVarCount++) > -1)
+				if(find(gv_stack, p->tok->tokenInstance, globalVarCount++) < 0)
+				{
+					push(&gv_stack, p->tok);
+				}
+				else
 				{
 					fprintf(stderr, "Error. Var %s previously declared\n", p->tok->tokenInstance);
 					exit(1);
-				}
-				push(&stack_node, p->tok);
+				}	
 			}
 			else
 			{
-				// Check local stack
-				if (find(stack_node, p->tok->tokenInstance, localVarCount++ - 1) > -1)
+				if(find(lv_stack, p->tok->tokenInstance, (*vc)++) < 0)
+				{
+					push(&lv_stack, p->tok);
+				}
+				else
 				{
 					fprintf(stderr, "Error. Var %s previously declared\n", p->tok->tokenInstance);
 					exit(1);
-				}
-				push(&stack_node, p->tok);
-				PUSH();
-				STACKW(0);
+				}	
 			}
 		}
-
 		if (p->child1)
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 	}
 	else if (strcmp(p->func, "<expr>") == 0)
 	{
 		if (p->child1) {
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 			PUSH();
 			STACKW(0);
 		}
 		if (p->child2) {
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);
 		}
 
 		STACKR(0);
@@ -136,12 +132,12 @@ void traverseTree(node* p, int level)
 	{
 		if (p->child1)
 		{
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 			PUSH();
 			STACKW(0);
 		}
 		if (p->child2)
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);
 
 		STACKR(0);
 		POP();
@@ -162,45 +158,65 @@ void traverseTree(node* p, int level)
 	{
 		if (p->child1)
 		{
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 			if (strcmp(p->child1->func, "<F>") == 0)
 				MULT("-1");
 		}
 		if (p->child2)
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);;
 	}
 	else if (strcmp(p->func, "<R>") == 0)
 	{
 		if (p->tok)
 		{
 			if (strcmp(returnStateID(p->tok->tokenID), "IDTOK") == 0)
-				if (find(stack_node, p->tok->tokenInstance, globalVarCount + localVarCount) < 0)
+			{
+				if (find(lv_stack, p->tok->tokenInstance, localVarCount) > -1)
+				{
+					STACKR(0);
+					// LOAD("T#");
+				}
+				else if (find(gv_stack, p->tok->tokenInstance, globalVarCount) > -1)
+				{
+					LOAD(p->tok->tokenInstance);
+				}
+				else
 				{
 					fprintf(stderr, "Error. Var %s not declared\n", p->tok->tokenInstance);
 					exit(1);
 				}
-			LOAD(p->tok->tokenInstance);
+			}
+			else
+				LOAD(p->tok->tokenInstance);
 		}
 		if (p->child1)
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 	}
 	else if (strcmp(p->func, "<in>") == 0)
 	{
-		if (strcmp(returnStateID(p->tok->tokenID), "IDTOK") == 0)
+		if (p->tok)
 		{
-			if (find(stack_node, p->tok->tokenInstance, globalVarCount + localVarCount) < 0)
+			if (strcmp(returnStateID(p->tok->tokenID), "IDTOK") == 0)
 			{
-					fprintf(stderr, "Error. Var %s not declared\n", p->tok->tokenInstance);
-					exit(1);
+				if(find(lv_stack, p->tok->tokenInstance, localVarCount) > -1)
+				{
+					READ("T#");
+					LOAD("T#");
+					PUSH();
+					STACKW(0);
+				}
+				else if(find(gv_stack, p->tok->tokenInstance, globalVarCount) > -1)
+				{
+					READ(p->tok->tokenInstance);
+				}
 			}
-			READ(p->tok->tokenInstance);
 		}
 	}
 	else if (strcmp(p->func, "<out>") == 0)
 	{
 		if (p->child1)
 		{
-			traverseTree(p->child1, ++level);	
+			traverseTree(p->child1, ++level, vc);	
 			WRITE("T#\n"); // Output temp
 		}
 	}
@@ -212,15 +228,15 @@ void traverseTree(node* p, int level)
 		strcpy(afterFuncName, "AFTER"); strcat(afterFuncName, funcName);
 
 		if (p->child1)
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 		if (p->child2)
 		{
 			COPY("V#", "T#");
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);;
 		}
 		if (p->child3)
 		{
-			traverseTree(p->child3, ++level);
+			traverseTree(p->child3, ++level, vc);
 			LOAD("V#");
 			SUB("T#");
 			if (p->child2->tok)
@@ -242,7 +258,7 @@ void traverseTree(node* p, int level)
 		if (p->child4)
 		{
 			FUNC(funcName, funcs++);
-			traverseTree(p->child4, ++level);
+			traverseTree(p->child4, ++level, vc);
 			FUNC(afterFuncName, --funcs);
 			NOOP();
 		}
@@ -256,15 +272,15 @@ void traverseTree(node* p, int level)
 		strcpy(afterFuncName, "AFTER"); strcat(afterFuncName, funcName);
 
 		if (p->child1)
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 		if (p->child2)
 		{
 			COPY("V#", "T#");
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);;
 		}
 		if (p->child3)
 		{
-			traverseTree(p->child3, ++level);
+			traverseTree(p->child3, ++level, vc);
 			LOAD("V#");
 			SUB("T#");
 			if (p->child2->tok)
@@ -286,7 +302,7 @@ void traverseTree(node* p, int level)
 		if (p->child4)
 		{
 			FUNC(funcName, funcs++);
-			traverseTree(p->child4, ++level);
+			traverseTree(p->child4, ++level, vc);
 			if (p->child2->tok)
 			{
 				if (strcmp(funcName, "LSSRTOK") == 0)
@@ -307,14 +323,14 @@ void traverseTree(node* p, int level)
 	else if (strcmp(p->func, "<assign>") == 0)
 	{
 		if (strcmp(returnStateID(p->tok->tokenID), "IDTOK") == 0)
-			if (find(stack_node, p->tok->tokenInstance, globalVarCount + localVarCount) < 0)
+			if (find(gv_stack, p->tok->tokenInstance, globalVarCount) < 0 && find(lv_stack, p->tok->tokenInstance, localVarCount) < 0)
 			{
 					fprintf(stderr, "Error. Var %s not declared\n", p->tok->tokenInstance);
 					exit(1);
 			}
 		if (p->child1)
 		{
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 			STORE("T#");
 			COPY(p->tok->tokenInstance, "T#");
 		}
@@ -322,13 +338,13 @@ void traverseTree(node* p, int level)
 	else
 	{
 		if (p->child1)
-			traverseTree(p->child1, ++level);
+			traverseTree(p->child1, ++level, vc);
 		if (p->child2)
-			traverseTree(p->child2, ++level);
+			traverseTree(p->child2, ++level, vc);;
 		if (p->child3)
-			traverseTree(p->child3, ++level);
+			traverseTree(p->child3, ++level, vc);
 		if (p->child4)
-			traverseTree(p->child4, ++level);
+			traverseTree(p->child4, ++level, vc);
 	}	
 }
 

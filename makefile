@@ -6,5 +6,5 @@ OBJ = codeGenerator.o main.o parser.o scanner.o stack.o staticSemantics.o token.
 %.o: %.c $(DEPS)
 		$(CC) -c -o $@ $< $(CFLAGS)
 
-p3: $(OBJ)
+comp: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS)

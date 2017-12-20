@@ -32,12 +32,12 @@ int main(int argc, char* argv[])
 
 void processArgs(int argc, char* argv[])
 {
-	if (argc < 2)
+	if (argc <1)
 	{
 		fprintf(stderr, "%s\n", "Too few arguments.");
 		exit(-1);
 	}
-	else if (argc == 2) // File redirection
+	else if (argc == 1) // File redirection
 	{
 		if ((inputFile = fopen("temp.txt", "w+")) == NULL)
 		{
@@ -57,9 +57,14 @@ void processArgs(int argc, char* argv[])
 		close(readFromOut);
 		fseek(inputFile, 0, SEEK_SET);
 	}
-	else if (argc == 3) // Input file
+	else if (argc == 2) // Input file
 	{
-		if ((inputFile = fopen(argv[2], "r")) == NULL)
+		char fileName[64];
+		strcpy(fileName, argv[1]);
+		printf("%s\n", argv[1]);
+		strcat(fileName, ".fs17");
+		printf("%s\n", fileName);
+		if ((inputFile = fopen(fileName, "r")) == NULL)
 		{
 			perror("Opening file failed");
 		    exit(1);
